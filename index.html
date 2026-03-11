@@ -1,139 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AR Menu — Product</title>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-<style>
-/* CSS Reset (optional, but good practice) */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AR Menu — Product</title>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background: #121212; /* Darker background for better contrast */
-  color: #fff; /* White text */
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Ensure content takes full viewport height */
-}
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 12px;
+    }
 
-h1 {
-  font-size: 2.5rem; /* Larger, more prominent title */
-  font-weight: 700; /* Bold title */
-  margin: 2rem 0 1rem 0;
-  letter-spacing: 0.05em; /* Slight letter spacing for readability */
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-}
+    /* Make the model-viewer large and centered */
+    model-viewer {
+      width: 95%;
+      max-width: 820px;
+      height: 72vh;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      background: #0b0b0b;
+      display: block;
+    }
 
-model-viewer {
-  width: 95%; /* Take up more width */
-  max-width: 700px; /* Increased max-width */
-  height: 60vh; /* Adjust height as needed */
-  margin: 1rem auto;
-  border-radius: 12px; /* Rounded corners for the model viewer */
-  overflow: hidden; /* Hide any overflow */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* More pronounced shadow */
-}
+    /* AR button styling (hidden initially; shown on fallback) */
+    button[slot="ar-button"] {
+      padding: 12px 18px;
+      font-size: 1.05rem;
+      border: none;
+      border-radius: 10px;
+      background: #2e7d32;
+      color: #fff;
+      cursor: pointer;
+      display: none; /* hidden by default; revealed only if needed */
+    }
 
-button[slot="ar-button"] {
-  padding: 1rem 1.5rem;
-  font-size: 1.2rem;
-  border: none;
-  background: #388e3c; /* Darker green for better contrast */
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease; /* Smooth transition on hover */
-}
+    /* small status message in top-left for debugging / feedback (optional) */
+    #status {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(0,0,0,0.45);
+      color: #ddd;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      z-index: 9999;
+      max-width: calc(100% - 40px);
+    }
 
-button[slot="ar-button"]:hover {
-  background: #4caf50; /* Lighter green on hover */
-}
-
-p {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  color: #ddd; /* Slightly lighter text color */
-}
-
-/* Footer styling */
-footer {
-  margin-top: auto; /* Push footer to the bottom */
-  padding: 1rem;
-  background: #212121;
-  color: #999;
-  font-size: 0.8rem;
-}
-
-/* Media query for smaller screens */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 2rem;
-  }
-  model-viewer {
-    height: 50vh;
-  }
-  button[slot="ar-button"] {
-    font-size: 1rem;
-    padding: 0.8rem 1.2rem;
-  }
-  p {
-    font-size: 1rem;
-  }
-}
-</style>
+    @media (max-width: 600px) {
+      model-viewer { height: 68vh; }
+      button[slot="ar-button"] { font-size: 1rem; padding: 10px 14px; }
+    }
+  </style>
 </head>
 <body>
 
-<h1>🍕 AR Product Preview</h1>
+  <!-- Optional small status for development/testing -->
+  <div id="status" aria-hidden="true">Attempting AR...</div>
 
-<model-viewer
-  id="ar-viewer"
-  src="pizza.glb"
-  ios-src="pizza.usdz"
-  ar
-  ar-modes="webxr scene-viewer quick-look"
-  camera-controls
-  auto-rotate
-  shadow-intensity="1"
-  xr-environment>  <!--  Improved environment lighting -->
+  <!-- Removed the <h1> stage completely, model-viewer is the first main element -->
+  <model-viewer
+    id="ar-viewer"
+    src="pizza.glb"
+    ios-src="pizza.usdz"
+    alt="3D pizza model"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    camera-controls
+    auto-rotate
+    shadow-intensity="1"
+    xr-environment
+  >
+    <!-- Leave the AR button in place as a fallback but hidden by default -->
+    <button slot="ar-button">View in AR</button>
+  </model-viewer>
 
-  <button slot="ar-button">View in AR</button>
-</model-viewer>
+  <script>
+    (function () {
+      const mv = document.getElementById('ar-viewer');
+      const statusEl = document.getElementById('status') || null;
 
-<p>See this delicious pizza in your own space!</p>
+      function setStatus(text) {
+        if (!statusEl) return;
+        statusEl.textContent = text;
+        // hide after a couple seconds
+        clearTimeout(setStatus._t);
+        setStatus._t = setTimeout(() => statusEl.style.opacity = '0.9', 2200);
+      }
 
-<footer>
-  <p>&copy; 2024 AR Menu Demo. All rights reserved.</p>
-</footer>
+      function showARButtonFallback() {
+        const btn = mv.querySelector('button[slot="ar-button"]');
+        if (btn) {
+          btn.style.display = 'inline-block'; // reveal fallback button
+          setStatus('Tap the "View in AR" button if AR didn\'t open automatically.');
+        }
+      }
 
-<script>
-  const modelViewer = document.getElementById('ar-viewer');
+      // Try to call activateAR() and handle success/failure
+      function tryActivateAR() {
+        if (!mv) return;
+        setStatus('Requesting AR...');
+        // Some browsers return a Promise from activateAR, some don't.
+        try {
+          const result = mv.activateAR();
+          // handle if it returns a promise
+          if (result && typeof result.then === 'function') {
+            result.then(() => {
+              setStatus('AR opened.');
+            }).catch(err => {
+              console.warn('activateAR promise rejected:', err);
+              showARButtonFallback();
+            });
+          } else {
+            // Not a promise — the call may still have triggered something.
+            setTimeout(() => {
+              // If still not in AR after a short delay, show fallback
+              showARButtonFallback();
+            }, 800);
+          }
+        } catch (err) {
+          // Often blocked if there's no user gesture
+          console.warn('activateAR threw:', err);
+          showARButtonFallback();
+        }
+      }
 
-  modelViewer.addEventListener('load', () => {
-    // Attempt to activate AR mode immediately after the model loads.
-    // This is the key to skipping the preview.
-    modelViewer.activateAR();
-  });
+      // Hide the built-in AR button by default to avoid the intermediate UI stage
+      const builtinBtn = mv.querySelector('button[slot="ar-button"]');
+      if (builtinBtn) builtinBtn.style.display = 'none';
 
+      // 1) Attempt immediate activation (this will often be blocked)
+      window.addEventListener('load', () => {
+        // Try immediately (may be blocked by browser)
+        tryActivateAR();
 
-  modelViewer.addEventListener('ar-status', (event) => {
-    if (event.detail.status === 'failed') {
-      console.error('AR activation failed:', event.detail.reason);
-      // Optionally display an error message to the user.
-    }
-  });
-</script>
+        // 2) As soon as the user gives any real gesture (tap / click), try again.
+        // this counts as a real gesture and should allow AR to open.
+        function onFirstGesture() {
+          setStatus('Gesture detected — entering AR...');
+          tryActivateAR();
+          // remove listener (we used {once:true} below; but also remove as safe-guard)
+          window.removeEventListener('pointerdown', onFirstGesture);
+        }
 
+        // Use passive listener to avoid interfering with scroll
+        window.addEventListener('pointerdown', onFirstGesture, { once: true, passive: true });
+        // also listen to touchstart for some older devices (some browsers only fire touchstart)
+        window.addEventListener('touchstart', onFirstGesture, { once: true, passive: true });
+      });
+
+      // Listen to model load for visibility/debugging
+      mv.addEventListener('load', () => {
+        console.log('Model loaded');
+        setStatus('Model loaded; preparing AR...');
+      });
+
+      // Monitor AR status events
+      mv.addEventListener('ar-status', (evt) => {
+        const s = evt?.detail?.status || 'unknown';
+        console.log('ar-status:', s, evt);
+        if (s === 'failed') {
+          setStatus('AR failed to start.');
+          showARButtonFallback();
+        } else if (s === 'session-started' || s === 'presenting') {
+          setStatus('In AR session.');
+        } else if (s === 'not-presenting') {
+          // not presenting in AR (preview mode)
+          setStatus('Not presenting in AR.');
+        }
+      });
+
+      // If user explicitly taps the built-in AR button (fallback), allow that to open AR.
+      if (builtinBtn) {
+        builtinBtn.addEventListener('click', () => setStatus('Fallback AR button tapped...'));
+      }
+
+      // Extra: if page is unloaded, clear status
+      window.addEventListener('pagehide', () => {
+        if (statusEl) statusEl.style.display = 'none';
+      });
+    })();
+  </script>
 </body>
 </html>
