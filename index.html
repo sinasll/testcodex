@@ -4,42 +4,98 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AR Menu — Product</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <style>
+/* CSS Reset (optional, but good practice) */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: white;
+  font-family: 'Roboto', sans-serif;
+  background: #121212; /* Darker background for better contrast */
+  color: #fff; /* White text */
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure content takes full viewport height */
 }
+
 h1 {
-  margin: 20px 0 10px 0;
+  font-size: 2.5rem; /* Larger, more prominent title */
+  font-weight: 700; /* Bold title */
+  margin: 2rem 0 1rem 0;
+  letter-spacing: 0.05em; /* Slight letter spacing for readability */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Subtle shadow */
 }
+
 model-viewer {
-  width: 90%;
-  max-width: 600px;
-  height: 70vh;
-  margin: 0 auto;
+  width: 95%; /* Take up more width */
+  max-width: 700px; /* Increased max-width */
+  height: 60vh; /* Adjust height as needed */
+  margin: 1rem auto;
+  border-radius: 12px; /* Rounded corners for the model viewer */
+  overflow: hidden; /* Hide any overflow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* More pronounced shadow */
 }
+
 button[slot="ar-button"] {
-  padding: 15px 20px;
-  font-size: 18px;
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
   border: none;
-  background: #00c853;
+  background: #388e3c; /* Darker green for better contrast */
   color: white;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition on hover */
 }
+
+button[slot="ar-button"]:hover {
+  background: #4caf50; /* Lighter green on hover */
+}
+
 p {
-  margin-top: 10px;
-  font-size: 16px;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #ddd; /* Slightly lighter text color */
+}
+
+/* Footer styling */
+footer {
+  margin-top: auto; /* Push footer to the bottom */
+  padding: 1rem;
+  background: #212121;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2rem;
+  }
+  model-viewer {
+    height: 50vh;
+  }
+  button[slot="ar-button"] {
+    font-size: 1rem;
+    padding: 0.8rem 1.2rem;
+  }
+  p {
+    font-size: 1rem;
+  }
 }
 </style>
 </head>
 <body>
 
-<h1>🍽️ AR Product Preview</h1>
+<h1>🍕 AR Product Preview</h1>
 
 <model-viewer
   id="ar-viewer"
@@ -49,12 +105,35 @@ p {
   ar-modes="webxr scene-viewer quick-look"
   camera-controls
   auto-rotate
-  shadow-intensity="1">
+  shadow-intensity="1"
+  xr-environment>  <!--  Improved environment lighting -->
 
-  <button slot="ar-button">View in your space</button>
+  <button slot="ar-button">View in AR</button>
 </model-viewer>
 
-<p>Tap the button to see the product in AR!</p>
+<p>See this delicious pizza in your own space!</p>
+
+<footer>
+  <p>&copy; 2024 AR Menu Demo. All rights reserved.</p>
+</footer>
+
+<script>
+  const modelViewer = document.getElementById('ar-viewer');
+
+  modelViewer.addEventListener('load', () => {
+    // Attempt to activate AR mode immediately after the model loads.
+    // This is the key to skipping the preview.
+    modelViewer.activateAR();
+  });
+
+
+  modelViewer.addEventListener('ar-status', (event) => {
+    if (event.detail.status === 'failed') {
+      console.error('AR activation failed:', event.detail.reason);
+      // Optionally display an error message to the user.
+    }
+  });
+</script>
 
 </body>
 </html>
